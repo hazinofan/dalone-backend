@@ -12,7 +12,7 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwt: JwtService,
-  ) { }
+  ) {}
 
   async register(dto: CreateUserDto) {
     return this.usersService.create(dto);
@@ -61,5 +61,4 @@ export class AuthService {
       user: jwtPayload,
     };
   }
-
 }
