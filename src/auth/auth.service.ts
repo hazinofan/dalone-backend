@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { OAuth2Client } from 'google-auth-library';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -12,7 +13,7 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwt: JwtService,
-  ) {}
+  ) { }
 
   async register(dto: CreateUserDto) {
     return this.usersService.create(dto);
@@ -26,11 +27,22 @@ export class AuthService {
   }
 
   async login(user: { id: number; email: string; role: string }) {
+    // 1) Update lastLogin in the DB
+    await this.usersService.updateLastLogin(user.id);
+
+    // 2) Build and sign your token payload
     const payload = { sub: user.id, email: user.email, role: user.role };
+
+    // 3) Return both token and (optional) user info
     return {
       access_token: this.jwt.sign(payload),
       user: payload,
     };
+  };
+
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.usersService.findByEmail(email);
   }
 
   async signInWithGoogle(idToken: string) {

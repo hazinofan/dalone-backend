@@ -36,7 +36,7 @@ export class ProfessionalProfile {
   @Column({ nullable: true })
   avatar?: string;
 
-  @Column()
+  @Column({type: 'text' })
   description: string;
 
   @Column()
@@ -44,6 +44,12 @@ export class ProfessionalProfile {
 
   @Column()
   phoneNumber: string;
+
+  @Column()
+  country: string
+
+  @Column()
+  city: string
 
   @Column('simple-json', { nullable: true })
   languages?: Language[];

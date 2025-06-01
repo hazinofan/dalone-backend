@@ -28,6 +28,10 @@ export class UsersService {
     return this.usersRepo.save(user);
   }
 
+  async updateLastLogin(userId: number): Promise<void> {
+    await this.usersRepo.update(userId, { lastLogin: new Date() });
+  }
+
 
   findAll(): Promise<User[]> {
     return this.usersRepo.find({
@@ -38,7 +42,10 @@ export class UsersService {
   async findOne(id: number): Promise<User> {
     const user = await this.usersRepo.findOne({
       where: { id },
-      select: ['id', 'email', 'role'],
+      relations: {
+        professionalProfile: true,
+        clientProfile: true
+      },
     });
     if (!user) throw new NotFoundException(`User ${id} not found`);
     return user;
@@ -73,8 +80,13 @@ export class UsersService {
   }
 
   async findById(id: number): Promise<User> {
-    const user = await this.usersRepo.findOne({ where: { id } });
-    if (!user) throw new NotFoundException(`User #${id} not found`);
+    const user = await this.usersRepo.findOne({
+      where: { id },
+      relations: ['professionalProfile', 'clientProfile'],  
+    });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
     return user;
   }
 }

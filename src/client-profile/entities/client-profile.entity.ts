@@ -24,8 +24,11 @@ export class ClientProfile {
   @Column({ nullable: true })
   avatar?: string;
 
-  @Column()
+  @Column({type: 'text' })
   description: string;
+
+  @Column()
+  country: string
 
   @OneToOne(() => User, (user) => user.clientProfile, {
     onDelete: 'CASCADE',

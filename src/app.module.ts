@@ -10,6 +10,10 @@ import { AuthModule } from './auth/auth.module';
 import { ProfessionalProfileModule } from './professional-profile/professional-profile.module';
 import { AppController } from './app.controller';
 import { ClientProfileModule } from './client-profile/client-profile.module';
+import { WorksModule } from './work/work.module';
+import { GigModule } from './gig/gig.module';
+import { ReviewsModule } from './reviews/reviews.module';
+import { SocialsModule } from './socials/socials.module';
 
 @Module({
   imports: [
@@ -38,6 +42,10 @@ import { ClientProfileModule } from './client-profile/client-profile.module';
     AuthModule,
     ProfessionalProfileModule,
     ClientProfileModule,
+    WorksModule,
+    GigModule,
+    ReviewsModule,
+    SocialsModule,
   ],
   controllers: [
     AppController, // ← register your file‐upload controller here

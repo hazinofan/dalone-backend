@@ -17,6 +17,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtOptionalGuard } from 'src/auth/jwt-optional.guard';
 
 @Controller('users')
 export class UsersController {
@@ -33,20 +34,12 @@ export class UsersController {
   }
 
   // ── PROTECTED PROFILE ────────────────────────────────────────────────────────
-  @UseGuards(JwtAuthGuard)
-  @Get('me')
+  @Get("me")
+  @UseGuards(JwtAuthGuard) // or AuthGuard("jwt") if you made a Passport-based guard
   async getProfile(@Req() req: any) {
-    console.log('[GET /users/me] req.user =', req.user);
-
-    // ← grab whichever you returned in your strategy:
-    const raw = req.user?.id ?? req.user?.sub;
-    const userId = typeof raw === 'string' ? parseInt(raw, 10) : raw;
-
-    if (typeof userId !== 'number' || isNaN(userId)) {
-      throw new UnauthorizedException('Invalid user id in token');
-    }
-
-    return this.usersService.findById(userId);
+    // At this point, JwtAuthGuard has already verified and 
+    // put { id, email, role } into req.user.
+    return req.user;
   }
 
   // ── PUBLIC ID ROUTES ─────────────────────────────────────────────────────────
