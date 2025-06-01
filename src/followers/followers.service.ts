@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Follow } from './follower.entity';
 import { User } from 'src/users/entities/user.entity';
+import { NotificationsService } from 'src/notifications/notifications.service';
 
 @Injectable()
 export class FollowersService {
@@ -10,24 +11,52 @@ export class FollowersService {
     @InjectRepository(Follow)
     private readonly repo: Repository<Follow>,
     @InjectRepository(User)
-    private readonly usersRepo: Repository<User>
+    private readonly usersRepo: Repository<User>,
+    private readonly notificationsService: NotificationsService
   ) { }
+
+
   // Create a follow
   async followUser(followerId: number, followingId: number) {
     if (followerId === followingId) throw new BadRequestException("Can't follow yourself");
 
-    const follower = await this.usersRepo.findOneBy({ id: followerId });
+    // ⬇️ Load both profiles
+    const follower = await this.usersRepo.findOne({
+      where: { id: followerId },
+      relations: ['professionalProfile', 'clientProfile'],
+    });
+
     const following = await this.usersRepo.findOneBy({ id: followingId });
 
     if (!follower || !following || following.role !== 'professional') {
       throw new NotFoundException('Invalid users or role');
     }
 
-    const existing = await this.repo.findOne({ where: { follower: { id: followerId }, following: { id: followingId } } });
+    const existing = await this.repo.findOne({
+      where: {
+        follower: { id: followerId },
+        following: { id: followingId },
+      },
+    });
+
     if (existing) throw new ConflictException('Already following');
 
     const follow = this.repo.create({ follower, following });
-    return this.repo.save(follow);
+    await this.repo.save(follow);
+
+    // ✅ Add this right before sending the notification
+    const displayName =
+      follower.professionalProfile?.username ??
+      follower.clientProfile?.username ??
+      follower.email?.split('@')[0] ??
+      'Someone';
+
+    await this.notificationsService.create(
+      following.id,
+      'follow',
+      `${displayName} started following you.`,
+      { followerId: follower.id }
+    );
   }
 
   // Unfollow
