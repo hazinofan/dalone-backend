@@ -14,6 +14,7 @@ import { WorksModule } from './work/work.module';
 import { GigModule } from './gig/gig.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { SocialsModule } from './socials/socials.module';
+import { FollowersModule } from './followers/followers.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { SocialsModule } from './socials/socials.module';
     GigModule,
     ReviewsModule,
     SocialsModule,
+    FollowersModule,
   ],
   controllers: [
     AppController, // ← register your file‐upload controller here

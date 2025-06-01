@@ -1,4 +1,5 @@
 import { ClientProfile } from 'src/client-profile/entities/client-profile.entity';
+import { Follow } from 'src/followers/follower.entity';
 import { Gig } from 'src/gig/entities/gig.entity';
 import { ProfessionalProfile } from 'src/professional-profile/entities/professional-profile.entity';
 import { Review } from 'src/reviews/entities/review.entity';
@@ -23,7 +24,7 @@ export class User {
   lastLogin?: Date;
 
   @Column({ nullable: true })
-  currentHashedRefreshToken: string;
+  currentHashedRefreshToken: string; 
 
   @OneToOne(() => ProfessionalProfile, (profile) => profile.user)
   professionalProfile?: ProfessionalProfile;
@@ -43,6 +44,12 @@ export class User {
   // all the reviews this user has received (as a professional)
   @OneToMany(() => Review, review => review.professional)
   reviewsReceived: Review[];
+
+  @OneToMany(() => Follow, (follow) => follow.follower)
+  followings: Follow[];
+
+  @OneToMany(() => Follow, (follow) => follow.following)
+  followers: Follow[];
 
   @OneToMany(() => Gig, (gig) => gig.user)
   gig: Gig[];
