@@ -44,4 +44,15 @@ export class ProfessionalProfileService {
 
     return this.repo.save(profile);
   }
+
+  async findAll() {
+    return this.repo.find({
+      relations: {
+        user:true
+      },
+      order: {
+        createdAt: 'DESC'
+      }
+    })
+  }
 }

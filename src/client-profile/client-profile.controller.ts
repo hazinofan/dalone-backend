@@ -1,34 +1,44 @@
-// src/client-profile/client-profile.controller.ts
-import { Controller, Post, Get, Body, Req, UseGuards, Patch, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Req,
+  Get,
+  Patch,
+  NotFoundException,
+} from '@nestjs/common';
 import { ClientProfileService } from './client-profile.service';
 import { CreateClientProfileDto } from './dto/create-client-profile.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { UpdateClientProfileDto } from './dto/update-client-profile.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('client-profile')
 export class ClientProfileController {
-  constructor(private svc: ClientProfileService) { }
+  constructor(private readonly clientProfileService: ClientProfileService) { }
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  @UseGuards(JwtAuthGuard)
-  create(@Req() req, @Body() dto: CreateClientProfileDto) {
-    return this.svc.create(req.user.sub, dto);
-  }
-
-  @Get()
-  getMine(@Req() req) {
-    return this.svc.findByUserId(req.user.sub);
-  }
-
-  @Patch()
-  @UseGuards(JwtAuthGuard)
-  async update(@Req() req, @Body() dto: UpdateClientProfileDto) {
-    const userId = req.user.sub;
-    const existing = await this.svc.findByUserId(userId);
-    if (!existing) {
-      throw new BadRequestException('Client profile does not exist');
+  async create(@Req() req, @Body() dto: CreateClientProfileDto) {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new NotFoundException('Authenticated user not found');
     }
-    return this.svc.updateByUserId(userId, dto);
+    return this.clientProfileService.create(userId, dto);
   }
 
+  // Optional: fetch client profile
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async getMyProfile(@Req() req) {
+    const userId = req.user?.id;
+    return this.clientProfileService.findByUserId(userId);
+  }
+
+  // Optional: update profile
+  @UseGuards(JwtAuthGuard)
+  @Patch()
+  async update(@Req() req, @Body() dto: Partial<CreateClientProfileDto>) {
+    const userId = req.user?.id;
+    return this.clientProfileService.update(userId, dto);
+  }
 }

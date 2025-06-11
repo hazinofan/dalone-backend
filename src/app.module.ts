@@ -1,10 +1,10 @@
 // src/app.module.ts
+import { MongooseModule } from '@nestjs/mongoose';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ProfessionalProfileModule } from './professional-profile/professional-profile.module';
@@ -16,16 +16,29 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { SocialsModule } from './socials/socials.module';
 import { FollowersModule } from './followers/followers.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { MessagesModule } from './messages/messages.module';
+import { AvailabilityModule } from './availability/availability.module';
+import { ReservationModule } from './reservation/reservation.module';
 
 @Module({
   imports: [
-    // serve anything in /public under the /public URL path
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/public',
     }),
 
     ConfigModule.forRoot({ isGlobal: true }),
+
+    // MongoDB connection
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        uri: config.get<string>('MONGO_URI'),
+      }),
+    }),
+
+    // MySQL connection
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -40,6 +53,7 @@ import { NotificationsModule } from './notifications/notifications.module';
         synchronize: true,
       }),
     }),
+
     UsersModule,
     AuthModule,
     ProfessionalProfileModule,
@@ -50,9 +64,10 @@ import { NotificationsModule } from './notifications/notifications.module';
     SocialsModule,
     FollowersModule,
     NotificationsModule,
+    MessagesModule,
+    AvailabilityModule,
+    ReservationModule,
   ],
-  controllers: [
-    AppController, // ← register your file‐upload controller here
-  ],
+  controllers: [AppController],
 })
 export class AppModule {}

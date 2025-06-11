@@ -73,4 +73,9 @@ export class AuthService {
       user: jwtPayload,
     };
   }
+
+  async signToken(user: User): Promise<string> {
+    const payload = { sub: user.id, email: user.email, role: user.role };
+    return this.jwt.sign(payload);
+  }
 }

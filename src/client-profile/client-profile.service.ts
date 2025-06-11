@@ -5,40 +5,45 @@ import { Repository } from 'typeorm';
 import { ClientProfile } from './entities/client-profile.entity';
 import { CreateClientProfileDto } from './dto/create-client-profile.dto';
 import { UpdateClientProfileDto } from './dto/update-client-profile.dto';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class ClientProfileService {
   constructor(
     @InjectRepository(ClientProfile)
     private repo: Repository<ClientProfile>,
-  ) {}
+
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
+  ) { }
 
   async create(userId: number, dto: CreateClientProfileDto) {
+    const user = await this.userRepo.findOneBy({ id: userId });
+    if (!user) {
+      throw new NotFoundException(`User ${userId} not found`);
+    }
+
     const profile = this.repo.create({
       ...dto,
-      user: { id: userId },
+      user: user,
     });
+
     return this.repo.save(profile);
   }
 
   async findByUserId(userId: number) {
-    const profile = await this.repo.findOne({
+    return this.repo.findOne({
       where: { user: { id: userId } },
+      relations: ['user'], // Optional, if you want user data
     });
-    if (!profile) throw new NotFoundException('Client profile not found');
-    return profile;
   }
 
-  async updateByUserId(
-    userId: number,
-    dto: UpdateClientProfileDto,
-  ): Promise<ClientProfile> {
-    const profile = await this.repo.findOne({ where: { user: { id: userId } } });
+  async update(userId: number, dto: Partial<CreateClientProfileDto>) {
+    const profile = await this.findByUserId(userId);
     if (!profile) {
-      throw new NotFoundException('Client profile not found');
+      throw new NotFoundException('Profile not found');
     }
 
-    // Merge only the provided fields
     Object.assign(profile, dto);
     return this.repo.save(profile);
   }

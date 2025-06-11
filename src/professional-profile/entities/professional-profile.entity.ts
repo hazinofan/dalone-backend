@@ -34,6 +34,9 @@ export class ProfessionalProfile {
   username: string;
 
   @Column({ nullable: true })
+  heroImage: string
+
+  @Column({ nullable: true })
   avatar?: string;
 
   @Column({type: 'text' })
