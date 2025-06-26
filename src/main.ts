@@ -11,12 +11,9 @@ async function bootstrap() {
     allowedHeaders: 'Content-Type,Authorization',
   });
 
-  // ↓ use their PORT env var, fallback to 3001 locally
   const port = parseInt(process.env.PORT || '3001', 10);
-
-  // ↓ bind to all interfaces (0.0.0.0) so Render can see you
+  // bind to all interfaces so Render can see it
   await app.listen(port, '0.0.0.0');
-
   console.log(`🚀 Listening on 0.0.0.0:${port}`);
 }
 bootstrap();
