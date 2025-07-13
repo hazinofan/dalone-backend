@@ -11,9 +11,8 @@ async function bootstrap() {
     allowedHeaders: 'Content-Type,Authorization',
   });
 
-  const port = parseInt(process.env.PORT || '3001', 10);
-  // bind to all interfaces so Render can see it
+  const port = 3001;
   await app.listen(port, '0.0.0.0');
-  console.log(`🚀 Listening on 0.0.0.0:${port}`);
+  console.log(`Server is running on port ${port}`);
 }
 bootstrap();

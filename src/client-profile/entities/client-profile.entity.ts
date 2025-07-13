@@ -30,6 +30,9 @@ export class ClientProfile {
   @Column()
   country: string
 
+  @Column()
+  city: string
+
   @OneToOne(() => User, (user) => user.clientProfile, {
     onDelete: 'CASCADE',
   })
