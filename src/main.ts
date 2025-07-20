@@ -1,28 +1,32 @@
 // src/main.ts
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { AppModule }   from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const whitelist = [
-    'http://localhost:3000',               // your dev URL
-    'https://dalone.netlify.app',          // your Netlify front-end
-    'https://dalone-backend.onrender.com', // if you ever call it from itself
+    'http://localhost:3000',
+    'https://dalone.netlify.app',
+    'https://dalone-backend.onrender.com',
   ];
+
   app.enableCors({
     origin: (origin, callback) => {
-      // allow requests with no origin (e.g. mobile apps, curl)
+      // allow non-browser requests
       if (!origin) return callback(null, true);
-      if (whitelist.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error(`Origin ${origin} not allowed by CORS`));
+
+      // normalize both sides to drop trailing slash
+      const incoming = origin.replace(/\/+$/, '');
+      if (whitelist.includes(incoming)) {
+        return callback(null, true);
       }
+
+      return callback(new Error(`CORS: Origin ${origin} not allowed`));
     },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type,Authorization',
-    credentials: true,  // if you send cookies or auth headers
+    credentials: true,
   });
 
   await app.listen(process.env.PORT || 3001, '0.0.0.0');
