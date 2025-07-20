@@ -11,17 +11,19 @@ async function bootstrap() {
     'https://dalone-backend.onrender.com',
   ];
 
-  // 1) Enable CORS as early as possible
   app.enableCors({
     origin: (origin, callback) => {
-      // allow server-to-server or tools like curl (no origin)
+      // allow non-browser (no origin) requests
       if (!origin) return callback(null, true);
 
-      // strip trailing slashes off incoming origin
+      // strip trailing slashes
       const incoming = origin.replace(/\/+$/, '');
 
-      if (whitelist.includes(incoming)) {
-        return callback(null, true);
+      // find the matching whitelist entry
+      const match = whitelist.find(u => u === incoming);
+      if (match) {
+        // return the normalized, slash-free URL
+        return callback(null, match);
       }
 
       return callback(new Error(`CORS: Origin ${origin} not allowed`), false);
@@ -30,8 +32,6 @@ async function bootstrap() {
     allowedHeaders: 'Content-Type,Authorization',
     credentials: true,
   });
-
-  // (any global pipes, guards, interceptors go here…)
 
   await app.listen(process.env.PORT || 3001, '0.0.0.0');
   console.log(`🚀 Server running on port ${process.env.PORT || 3001}`);
